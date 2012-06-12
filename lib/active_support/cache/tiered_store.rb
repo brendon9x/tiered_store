@@ -31,7 +31,7 @@ module ActiveSupport
 
       # Reads the value from the cache collection.
       def read(key, options=nil)
-        @caches.find { |c| c.read(key, options) }
+        @caches.each { |c| if (found = c.read(key, options)) then return found end }
       end
 
       # Takes the specified value out of the collection.

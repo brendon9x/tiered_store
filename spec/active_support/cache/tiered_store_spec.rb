@@ -39,8 +39,8 @@ module ActiveSupport
         end
 
         it "should delegate reads" do
-          @underlying.should_receive(:read).with(:key, :opts)
-          @store.read(:key, :opts)
+          @underlying.should_receive(:read).with(:key, :opts).and_return("foo")
+          @store.read(:key, :opts).should == "foo"
         end
 
         it "should delegate writes" do
