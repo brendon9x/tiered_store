@@ -1,4 +1,5 @@
 require "tiered_store/version"
+require 'active_support'
 
 module ActiveSupport
   module Cache
