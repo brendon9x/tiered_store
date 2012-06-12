@@ -1,5 +1,7 @@
 require "tiered_store/version"
 
-module TieredStore
-  # Your code goes here...
+module ActiveSupport
+  module Cache
+    autoload :TieredStore, 'active_support/cache/tiered_store'
+  end
 end

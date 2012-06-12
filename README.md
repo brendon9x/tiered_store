@@ -1,6 +1,8 @@
 # TieredStore
 
-TODO: Write a gem description
+TieredStore is an ActiveSupport Rails cache store which creates multiple cache stores, the intention being
+that faster, smaller memory caches can be layered on top of slow more persistent caches.  Currently, Rails 2.x
+only.
 
 ## Installation
 
@@ -18,7 +20,12 @@ Or install it yourself as:
 
 ## Usage
 
-TODO: Write usage instructions here
+For example, to create a memory cache on top a mem_cache store, add this to your environment.rb:
+
+    config.cache_store = :tiered_store, [
+      :memory,
+      [:mem_cache, "localhost:11011"]
+    ]
 
 ## Contributing
 
