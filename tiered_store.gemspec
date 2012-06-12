@@ -1,5 +1,5 @@
 # -*- encoding: utf-8 -*-
-require File.expand_path('../lib/tiered_store/version', __FILE__)
+require File.expand_path('../lib/active_support/cache/tiered_store', __FILE__)
 
 Gem::Specification.new do |gem|
   gem.authors       = ["Brendon McLean"]
@@ -13,7 +13,7 @@ Gem::Specification.new do |gem|
   gem.test_files    = gem.files.grep(%r{^(test|spec|features)/})
   gem.name          = "tiered_store"
   gem.require_paths = ["lib"]
-  gem.version       = TieredStore::VERSION
+  gem.version       = ActiveSupport::Cache::TieredStore::VERSION
 
   gem.add_development_dependency "rspec"
   gem.add_development_dependency "rcov"

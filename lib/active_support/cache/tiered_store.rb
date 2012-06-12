@@ -3,6 +3,8 @@ require 'active_support'
 module ActiveSupport
   module Cache
     class TieredStore < Store
+      VERSION = "0.0.1"
+
       attr_reader :caches
 
       # Returns a tiered cache store.  Create caches in order of speed and in reverse order of size.  For example, you
