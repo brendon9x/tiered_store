@@ -43,6 +43,11 @@ module ActiveSupport
           @store.read(:key, :opts).should == "foo"
         end
 
+        it "should return nil if no delegate caches hit" do
+          @underlying.should_receive(:read).with(:key, :opts).and_return(nil)
+          @store.read(:key, :opts).should be_nil
+        end
+
         it "should delegate writes" do
           @underlying.should_receive(:write).with(:key, :value, :opts)
           @store.write(:key, :value, :opts)
