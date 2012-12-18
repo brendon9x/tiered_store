@@ -16,6 +16,6 @@ Gem::Specification.new do |gem|
   gem.version       = TieredStore::VERSION
 
   gem.add_development_dependency "rspec"
-  gem.add_development_dependency "rcov"
+  gem.add_development_dependency "simplecov"
   gem.add_runtime_dependency "activesupport"
 end
