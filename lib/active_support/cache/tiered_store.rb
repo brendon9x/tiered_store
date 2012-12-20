@@ -3,7 +3,6 @@ require 'active_support'
 module ActiveSupport
   module Cache
     class TieredStore < Store
-      VERSION = "0.0.2"
 
       attr_reader :caches
 
@@ -25,30 +24,63 @@ module ActiveSupport
         end
       end
 
-      # Inserts the value into the cache collection or updates the existing value.
-      def write(key, value, options=nil)
-        @caches.each { |c| c.write(key, value, options) }
+      def silence!
+        @caches.each &:silence!
+        self
       end
 
-      # Reads the value from the cache collection.
-      def read(key, options=nil)
-        @caches.each { |c| if (found = c.read(key, options)) then return found end } and return nil
+      def fetch(name, options = nil)
+        (read(name, options) || (yield if block_given?)).tap do |result|
+          @caches.each { |c| c.write(name, result, options) } if result
+        end
       end
 
-      # Takes the specified value out of the collection.
-      def delete(key, options=nil)
-        @caches.each { |c| c.delete(key, options) }
+      def read(name, options = nil)
+        @caches.detect do |c|
+          result = c.read(name, options)
+          return result if result
+        end
       end
 
-      # Takes the value matching the pattern out of the collection.
-      def delete_matched(key, options=nil)
-        @caches.each { |c| c.delete_matched(key, options) }
+      def read_multi(*names)
+        @caches.detect do |c|
+          result = c.read_multi(*names)
+          return result if result
+        end
       end
 
-      # Wipes the whole cache.
-      def clear
-        @caches.each { |c| c.clear if c.respond_to? :clear }
+      def write(name, value, options = nil)
+        @caches.map { |c| c.write(name, value, options) }.last
       end
+
+      def delete(name, options = nil)
+        @caches.map { |c| c.delete(name, options) }.last
+      end
+
+      def exist?(name, options = nil)
+        @caches.any? { |c| c.exist?(name, options) }.present?
+      end
+
+      def delete_matched(matcher, options = nil)
+        @caches.map { |c| c.delete_matched(matcher, options) }.last
+      end
+
+      def increment(name, amount = 1, options = nil)
+        @caches.map { |c| c.increment(name, amount, options) }.last
+      end
+
+      def decrement(name, amount = 1, options = nil)
+        @caches.map { |c| c.decrement(name, amount, options) }.last
+      end
+
+      def cleanup(options = nil)
+        @caches.map { |c| c.cleanup(options) }.last
+      end
+
+      def clear(options = nil)
+        @caches.map { |c| c.clear(options) }.last
+      end
+
     end
   end
 end

@@ -4,6 +4,7 @@ module ActiveSupport
   module Cache
     describe TieredStore do
       describe :initialize do
+
         it "can take a symbol" do
           store = ActiveSupport::Cache.lookup_store :tiered_store, :caches => :memory_store
           store.caches.first.should be_a ActiveSupport::Cache::MemoryStore
@@ -17,62 +18,60 @@ module ActiveSupport
 
         it "can take stores that take arguments" do
           store = ActiveSupport::Cache.lookup_store :tiered_store, :caches => [
-            [:file_store, File.expand_path(File.dirname(__FILE__) + "/../../../tmp")]
+            [:memory_store, size: 64.megabytes]
           ]
-          store.caches.first.should be_a ActiveSupport::Cache::FileStore
+          store.caches.first.should be_a ActiveSupport::Cache::MemoryStore
         end
 
-        it "can take stores that take arguments" do
+        it "can take a mix of arguments" do
           store = ActiveSupport::Cache.lookup_store :tiered_store, :caches => [
-            [:file_store, File.expand_path(File.dirname(__FILE__) + "/../../../tmp")],
+            [:memory_store, size: 12.megabytes],
             :memory_store
           ]
-          store.caches.first.should be_a ActiveSupport::Cache::FileStore
+          store.caches.first.should be_a ActiveSupport::Cache::MemoryStore
           store.caches[1].should be_a ActiveSupport::Cache::MemoryStore
         end
       end
 
       describe :caching do
         before :each do
-          @underlying = double()
-          @store = ActiveSupport::Cache::TieredStore.new(:caches => @underlying)
+          @a = ActiveSupport::Cache::MemoryStore.new({})
+          @b = ActiveSupport::Cache::MemoryStore.new({})
+          @store = ActiveSupport::Cache::TieredStore.new(:caches => [@a, @b])
         end
 
         it "should delegate reads" do
-          @underlying.should_receive(:read).with(:key, :opts).and_return("foo")
-          @store.read(:key, :opts).should == "foo"
+          @a.write(:key, "foo")
+          @store.read(:key).should == "foo"
+        end
+
+        it "should delegate reads and keep going if first cache misses" do
+          @b.write(:key, "foo")
+          @store.read(:key).should == "foo"
         end
 
         it "should return nil if no delegate caches hit" do
-          @underlying.should_receive(:read).with(:key, :opts).and_return(nil)
-          @store.read(:key, :opts).should be_nil
+          @store.read(:key).should be_nil
         end
 
         it "should delegate writes" do
-          @underlying.should_receive(:write).with(:key, :value, :opts)
-          @store.write(:key, :value, :opts)
+          @store.write(:key, "value")
+          @a.read(:key).should == "value"
+          @b.read(:key).should == "value"
         end
 
         it "should delegate deletes" do
-          @underlying.should_receive(:delete).with(:key, :opts)
-          @store.delete(:key, :opts)
-        end
-
-        it "should delegate delete_matched" do
-          @underlying.should_receive(:delete_matched).with(:key, :opts)
-          @store.delete_matched(:key, :opts)
+          @a.write(:key, "value")
+          @store.delete(:key)
+          @a.read(:key).should be_nil
         end
 
         it "should delegate clear" do
-          @underlying.should_receive(:clear)
+          @a.write(:key, "value")
           @store.clear
+          @a.read(:key).should be_nil
         end
 
-        it "should not delegate clear to caches without clear" do
-          @underlying.should_receive(:respond_to?).with(:clear).and_return(false)
-          @underlying.should_not_receive(:clear)
-          @store.clear
-        end
       end
     end
   end
