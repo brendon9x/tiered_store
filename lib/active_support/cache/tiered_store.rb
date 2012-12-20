@@ -78,7 +78,7 @@ module ActiveSupport
       end
 
       def clear(options = nil)
-        @caches.map { |c| c.clear(options) }.last
+        @caches.map { |c| c.clear }.last
       end
 
     end
