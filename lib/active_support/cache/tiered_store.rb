@@ -18,6 +18,7 @@ module ActiveSupport
       #   [:mem_cache, "localhost:11011"]
       # ]
       def initialize(options)
+        super
         raise ArgumentError, "requires options to contain[:caches]" unless options && options[:caches]
         @caches = Array(options[:caches]).map do |descriptor|
           ActiveSupport::Cache.lookup_store(descriptor)
